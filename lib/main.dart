@@ -1,3 +1,5 @@
+import 'package:app_dev_system/home.dart';
+import 'package:app_dev_system/register.dart';
 import 'package:flutter/material.dart';
 import 'package:app_dev_system/login.dart';
 
@@ -15,10 +17,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.purple,
+        primaryColor: const Color(0xFF8E44AD),
       ),
-      home: LoginPage(),
+      home: HomePage(),
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -6,174 +7,57 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int cartItems = 0; // Track the number of items in the cart
+  int _bottomNavIndex = 0;
 
-  void addToCart() {
-    setState(() {
-      cartItems++;
-    });
-  }
+  List<IconData> iconList = [
+    Icons.home,
+    Icons.favorite,
+    Icons.collections,
+    Icons.person,
+  ];
+
+  //List of the pages titles
+  List<String> titleList = [
+    'Home',
+    'Favorite',
+    'My Collection',
+    'Profile',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          // You can customize the app bar according to your needs
-          title: Text('Home'),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Header(),
-              HomeSection(),
-              ProductsSection(addToCart: addToCart),
-              AboutSection(),
-              HomeContactSection(),
-              Footer(),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+          Text(
+          titleList[_bottomNavIndex],
+          style: TextStyle(
+            color: Color(0xFF8E44AD),
+            fontWeight: FontWeight.w500,
+            fontSize: 24,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class Header extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text('Header'),
-    );
-  }
-}
-
-class HomeSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Text('Our mission is to build your dream'),
-          Text('Step into our virtual store and discover a world of possibilities, where quality meets affordability.'),
-          ElevatedButton(
-            onPressed: () {
-              // Add your discover more button functionality here
-            },
-            child: Text('Discover more'),
-          ),
         ],
+    ),
+
       ),
-    );
-  }
-}
+      bottomNavigationBar: AnimatedBottomNavigationBar(
+          splashColor: Color(0xFF8E44AD),
+          activeColor: Colors.white,
+          inactiveColor: Colors.black.withOpacity(.5),
+          icons: iconList,
+          activeIndex: _bottomNavIndex,
+          gapLocation: GapLocation.center,
+          notchSmoothness: NotchSmoothness.softEdge,
+          onTap: (index) {
+            setState(() {
+              _bottomNavIndex = index;
 
-class ProductsSection extends StatelessWidget {
-  final Function addToCart;
-
-  ProductsSection({required this.addToCart});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Text('Latest Products'),
-          Container(
-            child: ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 6, // Replace with the actual number of products
-              itemBuilder: (context, index) {
-                // Replace with your product widget implementation
-                return ProductItem(
-                  addToCart: addToCart,
-                );
-              },
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Add your load more button functionality here
-            },
-            child: Text('Load more'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ProductItem extends StatelessWidget {
-  final Function addToCart;
-
-  ProductItem({required this.addToCart});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Image.asset('images/product-image.jpg'), // Replace with the actual product image
-          Text('Product Name'),
-          Text('Product Price'),
-          ElevatedButton(
-            onPressed: () {
-              addToCart(); // Call the addToCart function
-            },
-            child: Text('Add to cart'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class AboutSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Image.asset('images/about-image.jpg'), // Replace with the actual about image
-          Text('About Us'),
-          Text('Description of the company'),
-          ElevatedButton(
-            onPressed: () {
-              // Add your read more button functionality here
-            },
-            child: Text('Read more'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HomeContactSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Text('Have any questions?'),
-          ElevatedButton(
-            onPressed: () {
-              // Add your contact us button functionality here
-            },
-            child: Text('Contact us'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Footer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text('Footer'),
+            });
+          }),
     );
   }
 }

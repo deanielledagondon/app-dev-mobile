@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app_dev_system/model/users.dart';
+
 
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -18,8 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   List<String> _messages = [];
 
   void login(String email, String password) async {
-    final Uri url = Uri.parse(
-        'http://your-api-endpoint/login'); // Replace with your API endpoint
+    final Uri url = Uri.parse('https://app-dev-project.000webhostapp.com/login.php');
 
     final response = await http.post(
       url,
@@ -30,42 +33,41 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (response.statusCode == 200) {
-      // Login successful
       final responseData = json.decode(response.body);
 
       if (responseData['user_type'] == 'user') {
-        // User is a registered user
-        final user = responseData['user'];
+        final userJson = responseData['user'];
 
-        // Store user data in shared preferences or a state management solution
+        // Create User instance from JSON
+        User user = User.fromJson(userJson);
+
+        // Store user data in shared preferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('user_name', user['name']);
-        prefs.setString('user_email', user['email']);
-        prefs.setString('user_username', user['username']);
-        prefs.setInt('user_id', user['id']);
-        prefs.setString('user_image', user['pp']);
+        prefs.setString('user_email', user.email);
+        prefs.setString('user_username', user.username);
+        prefs.setInt('user_id', user.id);
+        prefs.setString('user_image', user.pp);
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       } else {
-        // User is not a registered user, treat as guest
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setBool('guest', true);
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
     } else {
-      // Login failed
       setState(() {
         _messages = ['Incorrect email or password!'];
       });
     }
   }
+
 
   void continueAsGuest() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -73,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => const HomePage()),
     );
   }
 
@@ -82,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(
           builder: (context) =>
-              RegisterPage()), // Replace with your RegisterPage widget
+              const RegisterPage()), // Replace with your RegisterPage widget
     );
   }
 

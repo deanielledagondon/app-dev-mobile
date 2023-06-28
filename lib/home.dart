@@ -111,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                   const Text(
                     'OUR MISSION IS TO BUILD YOUR DREAM',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),

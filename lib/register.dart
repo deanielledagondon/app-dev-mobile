@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
+import 'package:app_dev_system/model/users.dart';
+
+// import 'package:app_dev_system/conn/api.dart';
+
 
 import 'login.dart';
 
@@ -14,35 +18,34 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+
+
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _middleInitialController =
-      TextEditingController();
+  final TextEditingController _middleInitialController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumController = TextEditingController();
 
   bool _termsAccepted = false;
   String _errorMessage = '';
-  String _profilePicture = '';
 
   void navigateToLoginPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
-              LoginPage()), // Replace with your RegisterPage widget
+              LoginPage()),
     );
   }
 
   Future<void> _uploadImage() async {
     final picker = ImagePicker();
-    final pickedImage = await picker.getImage(source: ImageSource.gallery);
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
       final imageBytes = await pickedImage.readAsBytes();
@@ -52,6 +55,9 @@ class _RegisterPageState extends State<RegisterPage> {
       });
     }
   }
+
+  final String _UserType = 'User';
+  String _profilePicture = '';
 
   void register() async {
     if (!_formKey.currentState!.validate()) {
@@ -69,46 +75,59 @@ class _RegisterPageState extends State<RegisterPage> {
     final address = _addressController.text;
     final phoneNum = _phoneNumController.text;
 
-    // Perform the registration API call
+    // Create a new User instance
+    final user = User(
+      id: 0, // Set to 0 or default value since it will be assigned by the server
+      firstName: firstName,
+      lastName: lastName,
+      middleInitial: middleInitial,
+      username: username,
+      email: email,
+      password: password,
+      age: int.parse(age),
+      phoneNum: phoneNum,
+      address: address,
+      userType: _UserType,
+      pp: _profilePicture,
+    );
+
+    // Convert the user to JSON
+    final userJson = userToJson([user]);
+
+    // Make the POST request to the server
     final response = await http.post(
-      Uri.parse('http://your-api-endpoint/register'),
-      // Replace with your API endpoint
-      body: {
-        'firstName': firstName,
-        'lastName': lastName,
-        'middleInitial': middleInitial,
-        'username': username,
-        'email': email,
-        'password': password,
-        'cpassword': confirmPassword,
-        'age': age,
-        'address': address,
-        'phoneNum': phoneNum,
-        'pp': _profilePicture,
-        'terms': _termsAccepted.toString(),
+      Uri.parse('https://app-dev-project.000webhostapp.com/register.php'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
       },
+      body: userJson,
     );
 
     if (response.statusCode == 200) {
-      // Registration successful
-      final responseData = response.body;
-
-      if (responseData == 'Registered successfully!') {
-        // Redirect to login page or perform any other necessary actions
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      } else {
-        setState(() {
-          _errorMessage = responseData;
-        });
-      }
+      // Registration successful, navigate to login page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } else {
-      // Registration failed
-      setState(() {
-        _errorMessage = 'Registration failed. Please try again later.';
-      });
+      // Registration failed, show error message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Registration Failed'),
+            content: Text('An error occurred while registering. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -187,9 +206,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik'),
                           ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter your first name.';
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your first name';
                             }
                             return null;
                           },
@@ -214,9 +233,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik'),
                           ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter your last name.';
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your last name';
                             }
                             return null;
                           },
@@ -241,9 +260,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik'),
                           ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter your middle initial.';
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your middle initial';
                             }
                             return null;
                           },
@@ -272,9 +291,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik'),
                           ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter a username.';
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your username';
                             }
                             return null;
                           },
@@ -299,9 +318,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik'),
                           ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter an email.';
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
                             }
                             return null;
                           },
@@ -331,9 +350,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontFamily: 'Rubik'),
                           ),
                           obscureText: true,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter a password.';
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
                             }
                             return null;
                           },
@@ -359,8 +378,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontFamily: 'Rubik'),
                           ),
                           obscureText: true,
-                          validator: (value) {
-                            if (value!.isEmpty) {
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
                               return 'Please confirm your password.';
                             }
                             if (value != _passwordController.text) {
@@ -394,8 +413,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontFamily: 'Rubik'),
                           ),
                           keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value!.isEmpty) {
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
                               return 'Please enter your age.';
                             }
                             return null;
@@ -421,8 +440,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik'),
                           ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
                               return 'Please enter your address.';
                             }
                             return null;
@@ -450,8 +469,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontFamily: 'Rubik'),
                     ),
                     keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value!.isEmpty) {
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
                         return 'Please enter your phone number.';
                       }
                       return null;
